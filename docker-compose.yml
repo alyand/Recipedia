@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      - user-service
+      - recipe-service
+      - review-service
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "8001:8001"
+
+  recipe-service:
+    build: ./recipe-service
+    ports:
+      - "8002:8002"
+
+  review-service:
+    build: ./review-service
+    ports:
+      - "8003:8003"
