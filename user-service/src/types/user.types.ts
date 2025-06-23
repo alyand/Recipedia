@@ -44,6 +44,11 @@ export const inputUserSchema = userSchema.pick({
   avatar: true,
 });
 
+export const updateUserSchema = userSchema.pick({
+  fullname: true,
+  email: true,
+});
+
 export const outputUser = userSchema
   .omit({
     password: true,

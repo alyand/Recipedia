@@ -5,7 +5,7 @@ const PORT = process.env.PORT;
 
 /// == USER SERVICE ==
 app.use(
-  "/user-service",
+  "/user",
   createProxyMiddleware({
     target: "http://user-service:8001",
     changeOrigin: true,
@@ -17,7 +17,7 @@ app.use(
 
 // == RECIPE SERVICE ==
 app.use(
-  "/recipe-service",
+  "/recipe",
   createProxyMiddleware({
     target: "http://recipe-service:8002",
     changeOrigin: true,
@@ -29,7 +29,7 @@ app.use(
 
 // == REVIEW SERVICE ==
 app.use(
-  "/review-service",
+  "/review",
   createProxyMiddleware({
     target: "http://review-service:8003",
     changeOrigin: true,
