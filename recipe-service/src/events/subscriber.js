@@ -1,13 +1,20 @@
-const Recipe = require('../models/Recipe');
-const { getChannel } = require('../utils/rabbitmq');
-const { EXCHANGES, ROUTING_KEYS, QUEUES } = require('Recipedia\shared\rabbitmq\events.config.js'); // pastikan path sesuai
-
+const Recipe = require("../models/Recipe");
+const { getChannel } = require("../utils/rabbitmq");
+const {
+  EXCHANGES,
+  ROUTING_KEYS,
+  QUEUES,
+} = require("/app/shared/rabbitmq/events.config.js");
 const subscribe = async () => {
   const channel = await getChannel();
 
   // Assert exchanges
-  await channel.assertExchange(EXCHANGES.REVIEW_EVENTS, 'topic', { durable: true });
-  await channel.assertExchange(EXCHANGES.USER_EVENTS, 'topic', { durable: true });
+  await channel.assertExchange(EXCHANGES.REVIEW_EVENTS, "topic", {
+    durable: true,
+  });
+  await channel.assertExchange(EXCHANGES.USER_EVENTS, "topic", {
+    durable: true,
+  });
 
   // Declare named queue for recipe service
   const q = await channel.assertQueue(QUEUES.RECIPE_SERVICE, { durable: true });
@@ -16,7 +23,7 @@ const subscribe = async () => {
   const bindings = [
     { exchange: EXCHANGES.REVIEW_EVENTS, key: ROUTING_KEYS.REVIEW_CREATED },
     { exchange: EXCHANGES.REVIEW_EVENTS, key: ROUTING_KEYS.REVIEW_DELETED },
-    { exchange: EXCHANGES.USER_EVENTS, key: ROUTING_KEYS.USER_DELETED }
+    { exchange: EXCHANGES.USER_EVENTS, key: ROUTING_KEYS.USER_DELETED },
   ];
 
   for (const { exchange, key } of bindings) {
@@ -40,8 +47,11 @@ const subscribe = async () => {
           await Recipe.findByIdAndUpdate(data.recipeId, {
             $inc: { reviewCount: 1 },
             $set: {
-              averageRating: await calculateNewAverageOnCreate(data.recipeId, data.rating)
-            }
+              averageRating: await calculateNewAverageOnCreate(
+                data.recipeId,
+                data.rating
+              ),
+            },
           });
           break;
 
@@ -65,7 +75,7 @@ const handleReviewDeleted = async (recipeId, oldRating) => {
   if (!recipe || recipe.reviewCount <= 1) {
     await Recipe.findByIdAndUpdate(recipeId, {
       averageRating: 0,
-      reviewCount: 0
+      reviewCount: 0,
     });
     return;
   }
@@ -76,13 +86,13 @@ const handleReviewDeleted = async (recipeId, oldRating) => {
 
   await Recipe.findByIdAndUpdate(recipeId, {
     reviewCount: newReviewCount,
-    averageRating: Math.round(newAvg * 10) / 10
+    averageRating: Math.round(newAvg * 10) / 10,
   });
 };
 
 const calculateNewAverageOnCreate = async (recipeId, newRating) => {
   const recipe = await Recipe.findById(recipeId);
-  const totalRating = (recipe.averageRating * recipe.reviewCount) + newRating;
+  const totalRating = recipe.averageRating * recipe.reviewCount + newRating;
   const newAvg = totalRating / (recipe.reviewCount + 1);
   return Math.round(newAvg * 10) / 10;
 };
