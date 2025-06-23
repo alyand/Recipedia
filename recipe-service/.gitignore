@@ -1,0 +1,46 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker
+*.pid
+docker-compose.override.yml
+docker-volume/
+**/data/
+**/db/
+
+# VSCode / IDE settings
+.vscode/
+.idea/
+
+# Coverage / test
+coverage/
+.nyc_output/
+jest-output/
+
+# Build artifacts
+dist/
+build/
+
+# MongoDB dump/backup
+dump/
+
+# Optional: ignore uploads or temp files
+uploads/
+tmp/
+temp/
