@@ -1,13 +1,13 @@
 const express = require("express");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const app = express();
-const port = 8000;
+const PORT = process.env.PORT;
 
-//  API Gateway for user service
+/// == USER SERVICE ==
 app.use(
   "/user-service",
   createProxyMiddleware({
-    target: "http://localhost:8001",
+    target: "http://user-service:8001",
     changeOrigin: true,
     pathRewrite: {
       "^/user-service": "",
@@ -15,11 +15,11 @@ app.use(
   })
 );
 
-//  API Gateway for recipe service
+// == RECIPE SERVICE ==
 app.use(
   "/recipe-service",
   createProxyMiddleware({
-    target: "http://localhost:8002",
+    target: "http://recipe-service:8002",
     changeOrigin: true,
     pathRewrite: {
       "^/recipe-service": "",
@@ -27,11 +27,11 @@ app.use(
   })
 );
 
-//  API Gateway for recipe service
+// == REVIEW SERVICE ==
 app.use(
   "/review-service",
   createProxyMiddleware({
-    target: "http://localhost:8003",
+    target: "http://review-service:8003",
     changeOrigin: true,
     pathRewrite: {
       "^/review-service": "",
@@ -39,6 +39,6 @@ app.use(
   })
 );
 
-app.listen(port, () => {
-  console.log(`API Gateway berjalan pada port ${port}`);
+app.listen(PORT, () => {
+  console.log(`API Gateway berjalan pada port ${PORT}`);
 });

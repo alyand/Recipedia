@@ -1,11 +1,14 @@
 version: "3.8"
 
 services:
-  # === SERVICES ===
   api-gateway:
     build: ./api-gateway
     ports:
       - "8000:8000"
+    environment:
+      - PORT=8000
+    volumes:
+      - ./shared:/app/shared
     depends_on:
       - user-service
       - recipe-service
@@ -17,7 +20,13 @@ services:
       - "8001:8001"
     environment:
       - MONGO_URL=mongodb://mongo-user:27017/userdb
-    depends_on: [mongo-user, rabbitmq]
+      - PORT=8001
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    volumes:
+      - ./shared:/app/shared
+    depends_on:
+      - mongo-user
+      - rabbitmq
 
   recipe-service:
     build: ./recipe-service
@@ -25,7 +34,13 @@ services:
       - "8002:8002"
     environment:
       - MONGO_URL=mongodb://mongo-recipe:27017/recipedb
-    depends_on: [mongo-recipe, rabbitmq]
+      - PORT=8002
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    volumes:
+      - ./shared:/app/shared
+    depends_on:
+      - mongo-recipe
+      - rabbitmq
 
   review-service:
     build: ./review-service
@@ -33,9 +48,14 @@ services:
       - "8003:8003"
     environment:
       - MONGO_URL=mongodb://mongo-review:27017/reviewdb
-    depends_on: [mongo-review, rabbitmq]
+      - PORT=8003
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    volumes:
+      - ./shared:/app/shared
+    depends_on:
+      - mongo-review
+      - rabbitmq
 
-  # === DATABASE ====
   mongo-user:
     image: mongo
     ports: ["27017:27017"]
@@ -51,7 +71,6 @@ services:
     ports: ["27019:27017"]
     volumes: [mongo-review-data:/data/db]
 
-  # === RABBITMQ ===
   rabbitmq:
     image: rabbitmq:3-management
     ports:
@@ -60,6 +79,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+
 volumes:
   mongo-user-data:
   mongo-recipe-data:

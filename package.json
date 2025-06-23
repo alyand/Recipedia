@@ -1,0 +1,8 @@
+{
+  "name": "recipedia",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "docker-compose -f docker-compose.yml up --build",
+    "down": "docker-compose down"
+  }
+}
