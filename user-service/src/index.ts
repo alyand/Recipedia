@@ -1,7 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import { connectDB } from "./database";
-import UserRouter from "./routes/user.route";
+import UserRouter from "./routes/external/user.route";
+import InternalRouter from "./routes/internal/user.route";
 import ErrorHandling from "./error/error-handler";
 
 dotenv.config();
@@ -13,7 +14,9 @@ const app = express();
 
 app.use(express.json());
 
-app.use(UserRouter);
+app.use("/api", UserRouter);
+
+app.use("/internal", InternalRouter);
 
 app.get("/", (req, res) => {
   res.json({ message: `Ini server User` });
