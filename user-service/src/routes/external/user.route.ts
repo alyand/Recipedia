@@ -1,11 +1,16 @@
 import express from "express";
 import {
   deleteAccount,
+  login,
   registerNewUser,
 } from "../../controllers/auth.controller";
 import catchAsync from "../../utils/catchAsync";
 import validateRequest from "../../middleware/validateBody";
-import { inputUserSchema, updateUserSchema } from "../../types/user.types";
+import {
+  inputUserSchema,
+  loginUserSchema,
+  updateUserSchema,
+} from "../../types/user.types";
 import {
   getAllUser,
   getUserById,
@@ -14,6 +19,7 @@ import {
 
 const router = express.Router();
 
+router.post("/login", validateRequest(loginUserSchema), catchAsync(login));
 router.post(
   "/new",
   validateRequest(inputUserSchema),
