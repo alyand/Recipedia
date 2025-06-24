@@ -4,8 +4,15 @@ import sanitizeUser from "../utils/sanitizeUser";
 import { ClientError } from "../error/ClientError";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { publishMessage } from "../service/publisher";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+
+const { ROUTING_KEYS } = require("/app/shared/rabbitmq/events.config.js");
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret-key";
+const USER_DELETE_KEYS = ROUTING_KEYS.USER_DELETED;
 
 async function registerNewUser(
   req: Request,
@@ -74,7 +81,7 @@ async function deleteAccount(req: Request, res: Response, next: NextFunction) {
   if (!updatedUser) {
     throw new ClientError("User not found, update failed", 404);
   }
-
+  await publishMessage(USER_DELETE_KEYS, { userId });
   return {
     statusCode: 200,
     message: "User updated successfully",
