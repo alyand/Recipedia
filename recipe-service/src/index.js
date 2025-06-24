@@ -9,7 +9,7 @@ const MONGODB_URI = process.env.MONGO_URL;
 const PORT = process.env.PORT | "8002";
 
 app.use(express.json());
-app.use("/recipes", require("./routes/externalRoutes"));
+app.use("/", require("./routes/externalRoutes"));
 app.use("/internal/recipes", require("./routes/internalRoutes"));
 
 mongoose.connect(MONGODB_URI).then(() => {

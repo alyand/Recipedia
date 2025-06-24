@@ -46,7 +46,9 @@ exports.getRecipesByUserId = async (req, res) => {
 // CREATE
 exports.createRecipe = async (req, res) => {
   const { userId, title, description, ingredients, steps } = req.body;
-
+  if (!userId) {
+    return res.status(400).json({ error: "userID is null" });
+  }
   try {
     const isUserValid = await validateUser(userId);
     if (!isUserValid) {
