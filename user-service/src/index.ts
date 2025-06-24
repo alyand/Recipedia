@@ -4,6 +4,7 @@ import { connectDB } from "./database";
 import UserRouter from "./routes/external/user.route";
 import InternalRouter from "./routes/internal/user.route";
 import ErrorHandling from "./error/error-handler";
+import { getChannel } from "./service/publisher";
 
 dotenv.config();
 
@@ -25,6 +26,8 @@ app.get("/", (req, res) => {
 app.use(ErrorHandling);
 
 await connectDB(MONGO_URI);
+
+await getChannel();
 
 app.listen(PORT, () => {
   console.log(`Server run on http://localhost:${PORT}/`);

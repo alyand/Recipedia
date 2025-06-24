@@ -1,6 +1,15 @@
 version: "3.8"
 
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
   api-gateway:
     build: ./api-gateway
     ports:
@@ -18,6 +27,7 @@ services:
     build: ./user-service
     ports:
       - "8001:8001"
+    restart: always
     environment:
       - MONGO_URL=mongodb://mongo-user:27017/userdb
       - PORT=8001
@@ -32,6 +42,7 @@ services:
     build: ./recipe-service
     ports:
       - "8002:8002"
+    restart: always
     environment:
       - MONGO_URL=mongodb://mongo-recipe:27017/recipedb
       - PORT=8002
@@ -46,6 +57,7 @@ services:
     build: ./review-service
     ports:
       - "8003:8003"
+    restart: always
     environment:
       - MONGO_URL=mongodb://mongo-review:27017/reviewdb
       - PORT=8003
@@ -70,15 +82,6 @@ services:
     image: mongo
     ports: ["27019:27017"]
     volumes: [mongo-review-data:/data/db]
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
 
 volumes:
   mongo-user-data:
