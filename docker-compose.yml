@@ -32,6 +32,7 @@ services:
     build: ./recipe-service
     ports:
       - "8002:8002"
+    restart: always
     environment:
       - MONGO_URL=mongodb://mongo-recipe:27017/recipedb
       - PORT=8002
