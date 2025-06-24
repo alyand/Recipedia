@@ -37,6 +37,11 @@ export const userSchema = z.object({
   __v: z.number(),
 });
 
+export const loginUserSchema = userSchema.pick({
+  email: true,
+  password: true,
+});
+
 export const inputUserSchema = userSchema.pick({
   fullname: true,
   email: true,
