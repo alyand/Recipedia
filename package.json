@@ -4,5 +4,8 @@
   "scripts": {
     "start": "docker-compose -f docker-compose.yml up --build",
     "down": "docker-compose down"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2"
   }
 }
