@@ -4,33 +4,36 @@ const {
   EXCHANGES,
   ROUTING_KEYS,
   QUEUES,
-} = require("/app/shared/rabbitmq/events.config.js");
+} = require("/app/shared/rabbitmq/events.config.js"); // pastikan path ini benar sesuai struktur docker volume
+
 const subscribe = async () => {
   const channel = await getChannel();
 
-  // Assert exchanges
-  await channel.assertExchange(EXCHANGES.REVIEW_EVENTS, "topic", {
-    durable: true,
-  });
+  // === 1. Assert exchanges (wajib agar sinkron) ===
   await channel.assertExchange(EXCHANGES.USER_EVENTS, "topic", {
     durable: true,
   });
+  await channel.assertExchange(EXCHANGES.REVIEW_EVENTS, "topic", {
+    durable: true,
+  });
 
-  // Declare named queue for recipe service
-  const q = await channel.assertQueue(QUEUES.RECIPE_SERVICE, { durable: true });
+  // === 2. Declare durable queue for recipe-service ===
+  const q = await channel.assertQueue(QUEUES.RECIPE_SERVICE, {
+    durable: true,
+  });
 
-  // Bind routing keys to queue
+  // === 3. Bind queue ke semua event relevan ===
   const bindings = [
+    { exchange: EXCHANGES.USER_EVENTS, key: ROUTING_KEYS.USER_DELETED },
     { exchange: EXCHANGES.REVIEW_EVENTS, key: ROUTING_KEYS.REVIEW_CREATED },
     { exchange: EXCHANGES.REVIEW_EVENTS, key: ROUTING_KEYS.REVIEW_DELETED },
-    { exchange: EXCHANGES.USER_EVENTS, key: ROUTING_KEYS.USER_DELETED },
   ];
 
   for (const { exchange, key } of bindings) {
     await channel.bindQueue(q.queue, exchange, key);
   }
 
-  // Start consuming
+  // === 4. Consume events ===
   channel.consume(q.queue, async (msg) => {
     try {
       const routingKey = msg.fields.routingKey;
@@ -63,13 +66,12 @@ const subscribe = async () => {
       channel.ack(msg);
     } catch (err) {
       console.error("[recipe-service] Error processing message:", err.message);
-      channel.nack(msg, false, false); // discard message
+      channel.nack(msg, false, false);
     }
   });
 };
 
-// === Helper functions ===
-
+// === Helpers ===
 const handleReviewDeleted = async (recipeId, oldRating) => {
   const recipe = await Recipe.findById(recipeId);
   if (!recipe || recipe.reviewCount <= 1) {
