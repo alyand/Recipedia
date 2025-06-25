@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const externalRoutes = require("./routes/externalRoutes");
-const internalRoutes = require("./routes/internalRoutes");
 const { subscribe } = require("./events/subscriber");
 
 const app = express();
@@ -13,10 +12,7 @@ const PORT = process.env.PORT || 8003;
 app.use(express.json());
 
 //Route PUBLIC (buat user / frontend)
-app.use("/review", externalRoutes);
-
-//Route INTERNAL (buat recipe-service, user-service)
-app.use("/internal/reviews", internalRoutes);
+app.use("/api", externalRoutes);
 
 //Connect ke database dan jalankan subscriber
 mongoose.connect(MONGODB_URI).then(() => {

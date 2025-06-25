@@ -15,23 +15,33 @@ import {
   getAllUser,
   getUserById,
   updateUserInfo,
+  getMyProfile,
 } from "../../controllers/user.controller";
+import authMiddleware from "../../middleware/authentication";
 
 const router = express.Router();
 
 router.post("/login", validateRequest(loginUserSchema), catchAsync(login));
+
 router.post(
   "/new",
   validateRequest(inputUserSchema),
   catchAsync(registerNewUser)
 );
+
 router.get("/", catchAsync(getAllUser));
-router.get("/:userId", catchAsync(getUserById));
+
+router.get("/my", authMiddleware, catchAsync(getMyProfile));
+
 router.patch(
-  "/:userId/profile",
+  "/my",
+  authMiddleware,
   validateRequest(updateUserSchema),
   catchAsync(updateUserInfo)
 );
-router.delete("/:userId", catchAsync(deleteAccount));
+
+router.delete("/my", authMiddleware, catchAsync(deleteAccount));
+
+router.get("/:userId", catchAsync(getUserById));
 
 export default router;

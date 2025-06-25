@@ -4,72 +4,56 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5672:${RABBITMQ_PORT}"
+      - "15672:${RABBITMQ_PORT_WEB}"
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
 
   api-gateway:
     build: ./api-gateway
     ports:
-      - "8000:8000"
+      - "8000:${PORT_GATEWAY}"
     environment:
-      - PORT=8000
+      - PORT=${PORT_GATEWAY}
     volumes:
       - ./shared:/app/shared
-    depends_on:
-      - user-service
-      - recipe-service
-      - review-service
 
   user-service:
     build: ./user-service
     ports:
-      - "8001:8001"
-    restart: always
+      - "8001:${PORT_USER}"
     environment:
+      - PORT=${PORT_USER}
+      - MONGO_URL=${MONGO_URL_USER}
       - JWT_SECRET=${JWT_SECRET}
-      - MONGO_URL=mongodb://mongo-user:27017/userdb
-      - PORT=8001
-      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - RABBITMQ_URL=${RABBITMQ_URL}
     volumes:
       - ./shared:/app/shared
-    depends_on:
-      - mongo-user
-      - rabbitmq
 
   recipe-service:
     build: ./recipe-service
     ports:
-      - "8002:8002"
-    restart: always
+      - "8002:${PORT_RECIPE}"
     environment:
+      - PORT=${PORT_RECIPE}
+      - MONGO_URL=${MONGO_URL_RECIPE}
       - JWT_SECRET=${JWT_SECRET}
-      - MONGO_URL=mongodb://mongo-recipe:27017/recipedb
-      - PORT=8002
-      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - RABBITMQ_URL=${RABBITMQ_URL}
     volumes:
       - ./shared:/app/shared
-    depends_on:
-      - mongo-recipe
-      - rabbitmq
 
   review-service:
     build: ./review-service
     ports:
-      - "8003:8003"
-    restart: always
+      - "8003:${PORT_REVIEW}"
     environment:
+      - PORT=${PORT_REVIEW}
+      - MONGO_URL=${MONGO_URL_REVIEW}
       - JWT_SECRET=${JWT_SECRET}
-      - MONGO_URL=${MONGO_URL}
-      - PORT=8003
-      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - RABBITMQ_URL=${RABBITMQ_URL}
     volumes:
       - ./shared:/app/shared
-    depends_on:
-      - mongo-review
-      - rabbitmq
 
   mongo-user:
     image: mongo

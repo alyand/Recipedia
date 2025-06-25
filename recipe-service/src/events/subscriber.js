@@ -4,7 +4,7 @@ const {
   EXCHANGES,
   ROUTING_KEYS,
   QUEUES,
-} = require("/app/shared/rabbitmq/events.config.js"); // pastikan path ini benar sesuai struktur docker volume
+} = require("/app/shared/rabbitmq/events.config.js");
 
 const subscribe = async () => {
   const channel = await getChannel();
@@ -59,7 +59,7 @@ const subscribe = async () => {
           break;
 
         case ROUTING_KEYS.REVIEW_DELETED:
-          await handleReviewDeleted(data.recipeId, data.oldRating);
+          await handleReviewDeleted(data.recipeId, data.rating);
           break;
       }
 
@@ -81,11 +81,9 @@ const handleReviewDeleted = async (recipeId, oldRating) => {
     });
     return;
   }
-
   const newReviewCount = recipe.reviewCount - 1;
   const totalRating = recipe.averageRating * recipe.reviewCount;
   const newAvg = (totalRating - oldRating) / newReviewCount;
-
   await Recipe.findByIdAndUpdate(recipeId, {
     reviewCount: newReviewCount,
     averageRating: Math.round(newAvg * 10) / 10,

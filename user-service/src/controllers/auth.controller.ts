@@ -43,19 +43,19 @@ async function registerNewUser(
 async function login(req: Request, res: Response, next: NextFunction) {
   const { email, password } = req.validatedBody;
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email, deletedAt: null });
 
   if (!user) {
-    throw new ClientError("Email not found", 404);
+    throw new ClientError("User not found, failed to login", 401);
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
-    throw new ClientError("Password is wrong", 401);
+    throw new ClientError("User not found, failed to login", 401);
   }
 
-  const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "1h" });
+  const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "2h" });
 
   return {
     statusCode: 200,
@@ -66,7 +66,7 @@ async function login(req: Request, res: Response, next: NextFunction) {
 }
 
 async function deleteAccount(req: Request, res: Response, next: NextFunction) {
-  const userId = req.params.userId;
+  const userId = req.user.userId;
 
   if (!userId) {
     throw new ClientError("userId is required", 400);
@@ -79,13 +79,12 @@ async function deleteAccount(req: Request, res: Response, next: NextFunction) {
   );
 
   if (!updatedUser) {
-    throw new ClientError("User not found, update failed", 404);
+    throw new ClientError("User not found, delete failed", 404);
   }
   await publishMessage(USER_DELETE_KEYS, { userId });
   return {
     statusCode: 200,
-    message: "User updated successfully",
-    data: sanitizeUser(updatedUser),
+    message: "User deleted successfully",
   };
 }
 

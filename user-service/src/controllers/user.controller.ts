@@ -32,7 +32,7 @@ async function getUserById(req: Request, res: Response, next: NextFunction) {
 }
 
 async function updateUserInfo(req: Request, res: Response, next: NextFunction) {
-  const userId = req.params.userId;
+  const userId = req.user.userId;
   const { fullname, email } = req.validatedBody;
 
   const userData = await User.findOneAndUpdate(
@@ -51,4 +51,18 @@ async function updateUserInfo(req: Request, res: Response, next: NextFunction) {
   };
 }
 
-export { getAllUser, getUserById, updateUserInfo };
+async function getMyProfile(req: Request, res: Response, next: NextFunction) {
+  const userId = req.user.userId;
+  const userData = await User.findOne({ _id: userId, deletedAt: null }).lean();
+
+  if (!userData) {
+    throw new ClientError("User not found", 404);
+  }
+
+  return {
+    statusCode: 200,
+    data: userData,
+  };
+}
+
+export { getAllUser, getUserById, updateUserInfo, getMyProfile };

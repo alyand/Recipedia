@@ -5,7 +5,7 @@ import { AnyZodObject } from "zod";
 declare global {
   namespace Express {
     interface Request {
-      //   user?: UserType; // atau 'any' jika belum punya tipe pasti
+      user?: UserType;
       validatedBody?: z.infer<AnyZodObject>;
       // validatedQuery?: AnyZodObject;
       validatedQuery?: z.infer<AnyZodObject>;

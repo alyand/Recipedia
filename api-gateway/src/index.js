@@ -6,21 +6,21 @@ const { rateLimit } = require("express-rate-limit");
 
 const userLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 50,
+  limit: 100,
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 const recipeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 200,
+  limit: 500,
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 const reviewLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 200,
+  limit: 500,
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -56,10 +56,10 @@ app.use(
   "/review",
   reviewLimiter,
   createProxyMiddleware({
-    target: "http://review-service:8003",
+    target: "http://review-service:8003/api",
     changeOrigin: true,
     pathRewrite: {
-      "^/review-service": "",
+      "^/review-service/api": "",
     },
   })
 );

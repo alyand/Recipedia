@@ -3,7 +3,7 @@ const axios = require("axios");
 const validateUser = async (userId) => {
   try {
     const response = await axios.get(
-      `http://user-service:8001/api/internal/users/${userId}`
+      `http://user-service:8001/internal/${userId}`
     );
     return response.status === 200;
   } catch (error) {
@@ -11,4 +11,4 @@ const validateUser = async (userId) => {
   }
 };
 
-module.exports = {validateUser};
+module.exports = { validateUser };

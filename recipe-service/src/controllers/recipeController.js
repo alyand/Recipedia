@@ -6,7 +6,7 @@ const { ROUTING_KEYS } = require("/app/shared/rabbitmq/events.config.js");
 // GET all recipes
 exports.getAllRecipes = async (req, res) => {
   try {
-    const recipes = await Recipe.find();
+    const recipes = await Recipe.find({ deletedAt: null });
     res.json(recipes);
   } catch (err) {
     res
@@ -18,7 +18,10 @@ exports.getAllRecipes = async (req, res) => {
 // GET by ID
 exports.getRecipeById = async (req, res) => {
   try {
-    const recipe = await Recipe.findById(req.params.id);
+    const recipe = await Recipe.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+    });
     if (!recipe) {
       return res.status(404).json({ error: "Resep tidak ditemukan." });
     }
@@ -33,7 +36,10 @@ exports.getRecipeById = async (req, res) => {
 // GET recipes by user ID
 exports.getRecipesByUserId = async (req, res) => {
   try {
-    const recipes = await Recipe.find({ userId: req.params.userId });
+    const recipes = await Recipe.find({
+      userId: req.params.userId,
+      deletedAt: null,
+    });
     res.json(recipes);
   } catch (err) {
     res.status(500).json({
@@ -51,7 +57,9 @@ exports.createRecipe = async (req, res) => {
   try {
     const isUserValid = await validateUser(userId);
     if (!isUserValid) {
-      return res.status(400).json({ error: "User ID tidak valid atau tidak ditemukan." });
+      return res
+        .status(400)
+        .json({ error: "User ID tidak valid atau tidak ditemukan." });
     }
 
     const newRecipe = new Recipe({
@@ -69,16 +77,34 @@ exports.createRecipe = async (req, res) => {
   }
 };
 
-
 // UPDATE
 exports.updateRecipe = async (req, res) => {
   try {
+    const userId = req.user.userId;
+    const oldRecipe = await Recipe.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+    });
+    if (!oldRecipe) {
+      return res.status(404).json({
+        error: "Recipe not found",
+      });
+    }
+
+    if (oldRecipe.userId !== userId) {
+      return res.status(403).json({
+        error: "You are not authorized to update this recipe",
+      });
+    }
+
     const updated = await Recipe.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
+
     if (!updated) {
       return res.status(404).json({ error: "Resep tidak ditemukan." });
     }
+
     res.json(updated);
   } catch (err) {
     res
@@ -90,14 +116,36 @@ exports.updateRecipe = async (req, res) => {
 // DELETE
 exports.deleteRecipe = async (req, res) => {
   try {
-    const deleted = await Recipe.findByIdAndDelete(req.params.id);
+    const userId = req.user.userId;
+    console.log(userId);
+    const oldRecipe = await Recipe.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+    });
+
+    if (!oldRecipe) {
+      return res.status(404).json({
+        error: "Recipe not found",
+      });
+    }
+
+    if (oldRecipe.userId !== userId) {
+      return res.status(403).json({
+        error: "You are not authorized to delete this recipe",
+      });
+    }
+
+    const deleted = await Recipe.findByIdAndUpdate(req.params.id, {
+      deletedAt: new Date(),
+    });
+
     if (!deleted) {
-      return res.status(404).json({ error: "Resep tidak ditemukan." });
+      return res.status(404).json({ error: "Recipe not found." });
     }
 
     // Publish event ke RabbitMQ
     await publishEvent(ROUTING_KEYS.RECIPE_DELETED, { recipeId: deleted._id });
-    res.status(200).json({ message: "Resep berhasil dihapus"});
+    res.status(200).json({ message: "Resep berhasil dihapus" });
   } catch (err) {
     res
       .status(500)
