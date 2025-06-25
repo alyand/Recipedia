@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:${RABBITMQ_PORT}"
+      - "15672:${RABBITMQ_PORT_WEB}"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8000:${PORT_GATEWAY}"
+    environment:
+      - PORT=${PORT_GATEWAY}
+    volumes:
+      - ./shared:/app/shared
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "8001:${PORT_USER}"
+    environment:
+      - PORT=${PORT_USER}
+      - MONGO_URL=${MONGO_URL_USER}
+      - JWT_SECRET=${JWT_SECRET}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    volumes:
+      - ./shared:/app/shared
+
+  recipe-service:
+    build: ./recipe-service
+    ports:
+      - "8002:${PORT_RECIPE}"
+    environment:
+      - PORT=${PORT_RECIPE}
+      - MONGO_URL=${MONGO_URL_RECIPE}
+      - JWT_SECRET=${JWT_SECRET}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    volumes:
+      - ./shared:/app/shared
+
+  review-service:
+    build: ./review-service
+    ports:
+      - "8003:${PORT_REVIEW}"
+    environment:
+      - PORT=${PORT_REVIEW}
+      - MONGO_URL=${MONGO_URL_REVIEW}
+      - JWT_SECRET=${JWT_SECRET}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+    volumes:
+      - ./shared:/app/shared
+
+  mongo-user:
+    image: mongo
+    ports: ["27017:27017"]
+    volumes: [mongo-user-data:/data/db]
+
+  mongo-recipe:
+    image: mongo
+    ports: ["27018:27017"]
+    volumes: [mongo-recipe-data:/data/db]
+
+  mongo-review:
+    image: mongo
+    ports: ["27019:27017"]
+    volumes: [mongo-review-data:/data/db]
+
+volumes:
+  mongo-user-data:
+  mongo-recipe-data:
+  mongo-review-data:
