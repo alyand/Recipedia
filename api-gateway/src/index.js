@@ -43,10 +43,10 @@ app.use(
   "/recipe",
   recipeLimiter,
   createProxyMiddleware({
-    target: "http://recipe-service:8002",
+    target: "http://recipe-service:8002/api",
     changeOrigin: true,
     pathRewrite: {
-      "^/recipe-service": "",
+      "^/recipe-service/api": "",
     },
   })
 );

@@ -45,16 +45,13 @@ exports.getRecipesByUserId = async (req, res) => {
 
 // CREATE
 exports.createRecipe = async (req, res) => {
-  const { userId, title, description, ingredients, steps } = req.body;
-  if (!userId) {
-    return res.status(400).json({ error: "userID is null" });
-  }
+  const { title, description, ingredients, steps } = req.body;
+  const userId = req.user.userId;
+
   try {
     const isUserValid = await validateUser(userId);
     if (!isUserValid) {
-      return res
-        .status(400)
-        .json({ error: "User ID tidak valid atau tidak ditemukan." });
+      return res.status(400).json({ error: "User ID tidak valid atau tidak ditemukan." });
     }
 
     const newRecipe = new Recipe({
@@ -64,12 +61,14 @@ exports.createRecipe = async (req, res) => {
       ingredients,
       steps,
     });
+
     await newRecipe.save();
     res.status(201).json(newRecipe);
   } catch (err) {
     res.status(500).json({ error: "Gagal membuat resep", detail: err.message });
   }
 };
+
 
 // UPDATE
 exports.updateRecipe = async (req, res) => {
@@ -98,7 +97,7 @@ exports.deleteRecipe = async (req, res) => {
 
     // Publish event ke RabbitMQ
     await publishEvent(ROUTING_KEYS.RECIPE_DELETED, { recipeId: deleted._id });
-    res.status(204).send();
+    res.status(200).json({ message: "Resep berhasil dihapus"});
   } catch (err) {
     res
       .status(500)
