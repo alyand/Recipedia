@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const {createReview, deleteReview} = require("../controllers/reviewControllers");
-const {upvoteReview, downvoteReview} = require("../controllers/reviewVoteControllers");
+const {createReview, deleteReview, upvoteReview, downvoteReview} = require("../controllers/reviewControllers");
+const authenticate = require("../middleware/authenticate");
 
 //public endpoints
-router.post("/review", createReview);
-router.delete("/review/:id", deleteReview);
+router.post("/review", authenticate, createReview);
+router.delete("/review/:id",authenticate, deleteReview);
 
 //vote review
-router.put("/review/:reviewId/upvote", upvoteReview);
-router.put("/review/:reviewId/downvote", downvoteReview);
+router.put("/:reviewId/upvote", authenticate, upvoteReview);
+router.put("/:reviewId/downvote", authenticate, downvoteReview);
 
 module.exports = router;

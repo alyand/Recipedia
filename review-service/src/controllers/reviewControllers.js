@@ -1,23 +1,24 @@
 const Review = require("../models/Review");
-const {publishEvent} = require("../events/publisher");
-const {ROUTING_KEYS} = require("/app/shared/rabbitmq/event.config.js");
+const ReviewVote = require("../models/ReviewVote");
+const { publishEvent } = require("../events/publisher");
+const { ROUTING_KEYS } = require("/app/shared/rabbitmq/events.config.js");
 
 //buat review baru (tanpa gambar)
 exports.createReview = async (req, res) => {
   try {
-    const { userId, recipeId, rating, comment } = req.body;
+    const userId = req.user.userId; //dari token
+    const { recipeId, rating, comment } = req.body;
 
     const newReview = new Review({
       userId,
       recipeId,
       rating,
       comment,
-      images: [] //kosongan
     });
 
     await newReview.save();
 
-    //ngirim event review.created ke recipe-service
+    //kirim event review.created ke recipe-service
     await publishEvent(ROUTING_KEYS.REVIEW_CREATED, {
       recipeId,
       reviewId: newReview._id,
@@ -43,7 +44,7 @@ exports.deleteReview = async (req, res) => {
       return res.status(404).json({ error: "Review tidak ditemukan" });
     }
 
-    //ngirim event review.deleted ke recipe-service
+    //kirim event review.deleted ke recipe-service
     await publishEvent(ROUTING_KEYS.REVIEW_DELETED, {
       recipeId: deleted.recipeId,
       reviewId: deleted._id,
@@ -82,7 +83,49 @@ exports.getReviewsByUserId = async (req, res) => {
   }
 };
 
-//hitung rata-rata rating dan total review untuk satu resep
+//Upvote review
+exports.upvoteReview = async (req, res) => {
+  const { reviewId } = req.params;
+  const userId = req.user.userId;
+
+  try {
+    const existingVote = await ReviewVote.findOne({ reviewId, userId });
+
+    if (existingVote) {
+      existingVote.vote = "upvote";
+      await existingVote.save();
+      return res.json({ message: "Vote diperbarui jadi upvote" });
+    }
+
+    await ReviewVote.create({ reviewId, userId, vote: "upvote" });
+    res.status(201).json({ message: "Upvote berhasil" });
+  } catch (err) {
+    res.status(500).json({ error: "Gagal upvote", detail: err.message });
+  }
+};
+
+//Downvote review
+exports.downvoteReview = async (req, res) => {
+  const { reviewId } = req.params;
+  const userId = req.user.userId;
+
+  try {
+    const existingVote = await ReviewVote.findOne({ reviewId, userId });
+
+    if (existingVote) {
+      existingVote.vote = "downvote";
+      await existingVote.save();
+      return res.json({ message: "Vote diperbarui jadi downvote" });
+    }
+
+    await ReviewVote.create({ reviewId, userId, vote: "downvote" });
+    res.status(201).json({ message: "Downvote berhasil" });
+  } catch (err) {
+    res.status(500).json({ error: "Gagal downvote", detail: err.message });
+  }
+};
+
+//itung rata-rata rating dan total review untuk satu resep
 exports.getRecipeSummary = async (req, res) => {
   try {
     const result = await Review.aggregate([

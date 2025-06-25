@@ -1,5 +1,6 @@
-const {getChannel} = require("../utils/rabbitmq");
-const {EXCHANGES} = require("/app/shared/rabbitmq/events.config.js");
+const {getChannel} = require("../utils/rabbitmq.js");
+const { EXCHANGES } = require("/app/shared/rabbitmq/events.config.js");
+
 
 //terbitin event ke exchange 
 exports.publishEvent = async (eventName, payload) => {
