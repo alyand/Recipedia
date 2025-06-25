@@ -29,6 +29,7 @@ services:
       - "8001:8001"
     restart: always
     environment:
+      - JWT_SECRET=${JWT_SECRET}
       - MONGO_URL=mongodb://mongo-user:27017/userdb
       - PORT=8001
       - RABBITMQ_URL=amqp://rabbitmq:5672
@@ -44,6 +45,7 @@ services:
       - "8002:8002"
     restart: always
     environment:
+      - JWT_SECRET=${JWT_SECRET}
       - MONGO_URL=mongodb://mongo-recipe:27017/recipedb
       - PORT=8002
       - RABBITMQ_URL=amqp://rabbitmq:5672
@@ -59,7 +61,8 @@ services:
       - "8003:8003"
     restart: always
     environment:
-      - MONGO_URL=mongodb://mongo-review:27017/reviewdb
+      - JWT_SECRET=${JWT_SECRET}
+      - MONGO_URL=${MONGO_URL}
       - PORT=8003
       - RABBITMQ_URL=amqp://rabbitmq:5672
     volumes:
