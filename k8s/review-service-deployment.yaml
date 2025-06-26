@@ -14,6 +14,15 @@ spec:
     spec:
       containers:
         - name: review-service
-          image: alya/review-service:latest
+          image: evasbr/review-service:latest
           ports:
             - containerPort: 8003
+          env:
+            - name: MONGO_URL
+              value: mongodb://mongo-review:27017/reviewedb
+            - name: PORT
+              value: "8003"
+            - name: JWT_SECRET
+              value: akmdlkamdawiodalkdmo340239u
+            - name: RABBITMQ_URL
+              value: amqp://rabbitmq:5672

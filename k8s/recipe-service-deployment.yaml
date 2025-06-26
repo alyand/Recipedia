@@ -14,6 +14,15 @@ spec:
     spec:
       containers:
         - name: recipe-service
-          image: alya/recipe-service:latest
+          image: evasbr/recipe-service:latest
           ports:
             - containerPort: 8002
+          env:
+            - name: MONGO_URL
+              value: mongodb://mongo-recipe:27017/recipedb
+            - name: PORT
+              value: "8002"
+            - name: JWT_SECRET
+              value: akmdlkamdawiodalkdmo340239u
+            - name: RABBITMQ_URL
+              value: amqp://rabbitmq:5672

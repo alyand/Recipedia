@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-review
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-review
+  template:
+    metadata:
+      labels:
+        app: mongo-review
+    spec:
+      containers:
+        - name: mongo
+          image: mongo
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-review-data
+              mountPath: /data/db
+      volumes:
+        - name: mongo-review-data
+          emptyDir: {}

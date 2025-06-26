@@ -14,6 +14,15 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: alya/user-service:latest
+          image: evasbr/user-service:latest
           ports:
             - containerPort: 8001
+          env:
+            - name: MONGO_URL
+              value: mongodb://mongo-user:27017/userdb
+            - name: PORT
+              value: "8001"
+            - name: JWT_SECRET
+              value: akmdlkamdawiodalkdmo340239u
+            - name: RABBITMQ_URL
+              value: amqp://rabbitmq:5672
